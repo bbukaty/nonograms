@@ -1,0 +1,25 @@
+{
+  "size": [5, 5],
+  "description": "One block per line, row 2 full, column 4 full",
+  "rowHints": [
+    [1],
+    [5],
+    [2],
+    [2],
+    [1]
+  ],
+  "colHints": [
+    [1],
+    [1],
+    [3],
+    [5],
+    [1]
+  ],
+  "solution": [
+    ["X", "X", "X", "O", "X"],
+    ["O", "O", "O", "O", "O"],
+    ["X", "X", "O", "O", "X"],
+    ["X", "X", "O", "O", "X"],
+    ["X", "X", "X", "O", "X"]
+  ]
+}

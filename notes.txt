@@ -1,0 +1,35 @@
+HUMAN SOLVE:
+
+fill domains
+anchor domains around Os
+ - bridge? will get caught the next time fill domains runs
+add Xs to portions with no active domains
+constrain domain within Xs
+ - includes "finding the only place within the domain where it can fit now"
+repeat
+
+
+example: we have a few domains in a line: (0,2) (3,7) (5, 10)
+~~~~~~~
+code:
+if we're executing this for a line, it's because there's a new tile in there
+so we marked this line for sweeping.
+
+right now sweep the whole line, but maybe in future we could optimize
+to mark the specific new tile(s) instead of the line and look at their domains.
+
+as we sweep if we find a tile:
+  if it's the first or last place a tile can go
+  or
+  if the domain it's in doesn't overlap with any other domains,
+    we know that tile's owner block
+    and
+    we can cut that blocks domain to blocklen/2 away from that tile.
+
+    cutting domain seems like a pretty safe operation,
+    because we'll never lose the end of a block as long as our logic is right.
+
+this might be a good time to "bridge" within solved domain portions
+
+when two tiles are marked with space between them and they're in a singular
+portion of one domain, we can "bridge"/mark all the tiles between them
