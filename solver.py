@@ -1,6 +1,5 @@
 from collections.abc import Sequence
-import json
-
+from utils import *
 
 class Tile:
     """One tile in the puzzle. status may be space, X, or O."""
@@ -48,30 +47,18 @@ class Line(Sequence):
         for tile in self:
             tile.set("X")
 
-def printPuzzle(puzzle):
-    """Takes 2d arr of strings, prints nonogram in ascii.
-    TODO print hints above and beside puzzle
-    """
-    width = len(puzzle[0])
-    print("┌" + "─┬" * (width-1) + "─┐")
-    for row in puzzle[:-1]:
-        print("│" + "│".join(row) + "│")
-        print("├" + "─┼" * (width-1) + "─┤")
-    print("│" + "│".join(puzzle[-1]) + "│")
-    print("└" + "─┴" * (width-1) + "─┘")
 
-
-def setUpTileRefs(height, width, rowHints, colHints):
+def setUpTileRefs(height, width, row_clues, col_clues):
     """Returns a few different useful ways of indexing into/around the puzzle grid."""
     rows = []
     for rowIndex in range(height):
         rowTiles = [Tile() for _ in range(width)]
-        rowBlocks = rowHints[rowIndex]
+        rowBlocks = row_clues[rowIndex]
         rows.append(Line("row", rowIndex, rowTiles, rowBlocks))
     cols = []
     for colIndex in range(width):
         colTiles = [row[colIndex] for row in rows]
-        colBlocks = colHints[colIndex]
+        colBlocks = col_clues[colIndex]
         cols.append(Line("col", colIndex, colTiles, colBlocks))
 
     for rowIndex in range(height):
@@ -155,15 +142,15 @@ def constrainDomainsWithinXs(line):
         line.blockDomains[i] = (domainStart, domainEnd)
         # while "X" in line
 
-def solvePuzzle(height, width, rowHints, colHints):
-    assert len(rowHints) == height and len(colHints) == width
-    rows, cols, lines = setUpTileRefs(height, width, rowHints, colHints)
+def solvePuzzle(row_clues, col_clues):
+    width, height = len(col_clues), len(row_clues)
+    rows, cols, lines = setUpTileRefs(height, width, row_clues, col_clues)
 
     for line in lines:
         initBlockDomains(line)
         fillDomainCenters(line)
 
-    for i in range(2):
+    for _ in range(2):
         for line in lines:
             anchorDomainsAroundOs(line)
         for line in lines:
@@ -178,15 +165,13 @@ def solvePuzzle(height, width, rowHints, colHints):
 
 
 if __name__ == "__main__":
-    debugPuzzle = "5x5_1"
-    with open(f"puzzles/{debugPuzzle}.json") as f:
-        puzzle = json.load(f)
-        height, width = puzzle["size"]
-        print(f"Solving test puzzle {debugPuzzle}...")
-        ourSolution = solvePuzzle(
-            height, width, puzzle["rowHints"], puzzle["colHints"])
+    debugPuzzle = "57596"
+    column_clues, row_clues = parse_pynogram_file(f"data/puzzles/{debugPuzzle}.txt")
 
-        print("Expected:")
-        printPuzzle(puzzle["solution"])
-        print("Got:")
-        printPuzzle(ourSolution)
+    print(f"Solving test puzzle {debugPuzzle}...")
+    ourSolution = solvePuzzle(row_clues, column_clues)
+
+    # print("Expected:")
+    # print_puzzle(puzzle["solution"])
+    print("Got:")
+    print_puzzle(ourSolution)
