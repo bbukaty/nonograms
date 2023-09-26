@@ -1,4 +1,4 @@
-def print_puzzle(puzzle):
+def print_puzzle_ascii(puzzle):
     """Takes 2d arr of strings, prints nonogram in ascii.
     TODO print hints above and beside puzzle
     """
@@ -9,6 +9,21 @@ def print_puzzle(puzzle):
         print("├" + "─┼" * (width - 1) + "─┤")
     print("│" + "│".join(puzzle[-1]) + "│")
     print("└" + "─┴" * (width - 1) + "─┘")
+
+def print_puzzle(puzzle):
+    for row in puzzle:
+        line = ''
+        for cell in row:
+            if cell == ' ':
+                line += '🟧'  # Two spaces for consistent width with emojis
+            elif cell == 'O':
+                line += '⬛'
+            elif cell == 'X':
+                line += '⬜'
+            else:
+                line += '❓'
+        print(line)
+
 
 
 def parse_pynogram_file(puzzle_path):
