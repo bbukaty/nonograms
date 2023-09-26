@@ -13,11 +13,11 @@ class Tile:
     def __str__(self):
         return self.status
 
-    def __eq__(self, __value):
-        return self.status == __value
+    def __eq__(self, value):
+        return self.status == value
 
-    def set(self, newStatus):
-        self.status = newStatus
+    def set(self, new_status):
+        self.status = new_status
 
 
 class Line(Sequence):
@@ -31,8 +31,8 @@ class Line(Sequence):
         self.position = position
         self.tiles = tiles
         self.blocks = blocks
-        self.blockDomains = []
-        self.hasChanges = False
+        self.block_domains = []
+        self.has_changes = False
 
     def __getitem__(self, i):
         return self.tiles[i]
@@ -48,148 +48,148 @@ class Line(Sequence):
     def __str__(self):
         return f"{self.orientation} {self.position}"
 
-    def fillXs(self):
+    def fill_xs(self):
         for tile in self:
             tile.set("X")
-        self.hasChanges = True
+        self.has_changes = True
 
 
-def setUpTileRefs(height, width, row_clues, col_clues):
+def set_up_tile_refs(height, width, row_clues, col_clues):
     """Returns a few different useful ways of indexing into/around the puzzle grid."""
     rows = []
-    for rowIndex in range(height):
-        rowTiles = [Tile() for _ in range(width)]
-        rowBlocks = row_clues[rowIndex]
-        rows.append(Line("row", rowIndex, rowTiles, rowBlocks))
+    for row_index in range(height):
+        row_tiles = [Tile() for _ in range(width)]
+        row_blocks = row_clues[row_index]
+        rows.append(Line("row", row_index, row_tiles, row_blocks))
     cols = []
-    for colIndex in range(width):
-        colTiles = [row[colIndex] for row in rows]
-        colBlocks = col_clues[colIndex]
-        cols.append(Line("col", colIndex, colTiles, colBlocks))
+    for col_index in range(width):
+        col_tiles = [row[col_index] for row in rows]
+        col_blocks = col_clues[col_index]
+        cols.append(Line("col", col_index, col_tiles, col_blocks))
 
-    for rowIndex in range(height):
-        for colIndex in range(width):
-            tile = rows[rowIndex][colIndex]
-            tile.row = rows[rowIndex]
-            tile.col = cols[colIndex]
+    for row_index in range(height):
+        for col_index in range(width):
+            tile = rows[row_index][col_index]
+            tile.row = rows[row_index]
+            tile.col = cols[col_index]
     return (rows, cols, rows + cols)
 
 
-def initBlockDomains(line):
+def init_block_domains(line):
     """Block by block, "slides" all other blocks to the edges of the grid.
     This gives us sort of a "worst case" baseline domain for the block to go in.
     """
-    spaceBefore = 0
-    spaceAfter = sum(line.blocks) + len(line.blocks)
+    space_before = 0
+    space_after = sum(line.blocks) + len(line.blocks)
     for block in line.blocks:
-        spaceAfter -= block + 1
-        line.blockDomains.append((spaceBefore, len(line) - spaceAfter - 1))
-        spaceBefore += block + 1
+        space_after -= block + 1
+        line.block_domains.append((space_before, len(line) - space_after - 1))
+        space_before += block + 1
 
-def fillDomainCenters(line):
+def fill_domain_centers(line):
     """Fills middle of domains where block is longer than half domain size."""
-    if not line.blockDomains: return
+    if not line.block_domains: return
 
-    for i in range(len(line.blockDomains)):
-        blockLen, blockDomain = line.blocks[i], line.blockDomains[i]
-        domainStart, domainEnd = blockDomain
-        domainLen = domainEnd - domainStart + 1
-        for i in range(domainLen - blockLen, blockLen):
-            lineIndex = domainStart + i
-            if line[lineIndex].status == "O":
+    for i in range(len(line.block_domains)):
+        block_len, block_domain = line.blocks[i], line.block_domains[i]
+        domain_start, domain_end = block_domain
+        domain_len = domain_end - domain_start + 1
+        for i in range(domain_len - block_len, block_len):
+            line_index = domain_start + i
+            if line[line_index].status == "O":
                 continue
-            line[lineIndex].status = "O"
-            if DEBUG: print(f"added an O at index {lineIndex}")
-            line.hasChanges = True
+            line[line_index].status = "O"
+            if DEBUG: print(f"added an O at index {line_index}")
+            line.has_changes = True
 
 
-def getActiveDomains(line, i):
+def get_active_domains(line, i):
     """hacky. quite redundant to do this for every tile in a line."""
-    activeDomains = []
-    for domainIndex, domain in enumerate(line.blockDomains):
+    active_domains = []
+    for domain_index, domain in enumerate(line.block_domains):
         a, b = domain
         if a <= i and i <= b:
-            activeDomains.append(domainIndex)
-    return activeDomains
+            active_domains.append(domain_index)
+    return active_domains
 
-def anchorDomainsAroundOs(line):
+def anchor_domains_around_os(line):
     """For every O in a line, if we know what block it belongs to,
-    we can cut that block's domain to blockLen away from that O."""
-    for tileIndex, tile in enumerate(line):
+    we can cut that block's domain to block_len away from that O."""
+    for tile_index, tile in enumerate(line):
         if tile.status != "O":
             continue
-        activeDomains = getActiveDomains(line, tileIndex)
+        active_domains = get_active_domains(line, tile_index)
 
-        assert len(activeDomains) > 0  # every O should have >=1 domains
-        if len(activeDomains) == 1:
-            blockIndex = activeDomains[0]
-            blockLen = line.blocks[blockIndex]
-            currDomain = line.blockDomains[blockIndex]
-            a, b = currDomain
-            newA = max(tileIndex - blockLen + 1, a)
-            newB = min(tileIndex + blockLen - 1, b)
-            line.blockDomains[blockIndex] = (newA, newB)
+        assert len(active_domains) > 0  # every O should have >=1 domains
+        if len(active_domains) == 1:
+            block_index = active_domains[0]
+            block_len = line.blocks[block_index]
+            curr_domain = line.block_domains[block_index]
+            a, b = curr_domain
+            new_a = max(tile_index - block_len + 1, a)
+            new_b = min(tile_index + block_len - 1, b)
+            line.block_domains[block_index] = (new_a, new_b)
 
-def fillNoDomainsWithXs(line):
+def fill_no_domains_with_xs(line):
     """If there are no domains that cover an index in a line, that space must be empty; put an X there."""
     for i, tile in enumerate(line):
         if tile.status != " ":
             continue
-        activeDomains = getActiveDomains(line, i)
-        if not activeDomains:
+        active_domains = get_active_domains(line, i)
+        if not active_domains:
             if DEBUG: print(f"added an X at index {i}")
             tile.status = "X"
-            line.hasChanges = True
+            line.has_changes = True
 
-def constrainDomainsWithinXs(line):
+def constrain_domains_within_xs(line):
     """If there are some Xs at the edge of a block domain, slide that edge of the domain inward
     until there's no Xs preventing the block from going there.
     """
-    for blockIndex, (blockLen, blockDomain) in enumerate(zip(line.blocks, line.blockDomains)):
-        a, b = blockDomain
-        while "X" in line[a:a+blockLen]:
+    for block_index, (block_len, block_domain) in enumerate(zip(line.blocks, line.block_domains)):
+        a, b = block_domain
+        while "X" in line[a:a+block_len]:
             a += 1
-        while "X" in line[b-blockLen+1:b+1]:
+        while "X" in line[b-block_len+1:b+1]:
             b -= 1
-        line.blockDomains[blockIndex] = (a, b)
+        line.block_domains[block_index] = (a, b)
 
-def solvePuzzle(row_clues, col_clues):
+def solve_puzzle(row_clues, col_clues):
     width, height = len(col_clues), len(row_clues)
-    rows, cols, lines = setUpTileRefs(height, width, row_clues, col_clues)
+    rows, cols, lines = set_up_tile_refs(height, width, row_clues, col_clues)
 
     for line in lines:
         if DEBUG: print(f"{line}")
         if line.blocks[0] == 0:
-            line.fillXs()
+            line.fill_xs()
             continue
-        initBlockDomains(line)
-        fillDomainCenters(line)
+        init_block_domains(line)
+        fill_domain_centers(line)
 
-    progressMade = True
-    while progressMade:
-        progressMade = False
+    progress_made = True
+    while progress_made:
+        progress_made = False
         for line in lines: # lines includes rows, then columns.
             #future optimization: check if line is complete and skip it
             if DEBUG: print(f"{line}")
-            anchorDomainsAroundOs(line)
-            fillNoDomainsWithXs(line)
-            constrainDomainsWithinXs(line)
-            fillDomainCenters(line)
-            if line.hasChanges:
-                progressMade = True
-                line.hasChanges = False # reset for next iteration
+            anchor_domains_around_os(line)
+            fill_no_domains_with_xs(line)
+            constrain_domains_within_xs(line)
+            fill_domain_centers(line)
+            if line.has_changes:
+                progress_made = True
+                line.has_changes = False # reset for next iteration
 
     return [[str(tile) for tile in row] for row in rows]
 
 
 if __name__ == "__main__":
-    debugPuzzle = "13698"
-    column_clues, row_clues = parse_pynogram_file(f"data/puzzles/{debugPuzzle}.txt")
+    debug_puzzle = "13698"
+    column_clues, row_clues = parse_pynogram_file(f"data/puzzles/{debug_puzzle}.txt")
 
-    print(f"Solving test puzzle {debugPuzzle}...")
-    ourSolution = solvePuzzle(row_clues, column_clues)
+    print(f"Solving test puzzle {debug_puzzle}...")
+    our_solution = solve_puzzle(row_clues, column_clues)
 
     # print("Expected:")
     # print_puzzle(puzzle["solution"])
     print("Got:")
-    print_puzzle(ourSolution)
+    print_puzzle(our_solution)

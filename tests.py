@@ -1,5 +1,5 @@
 import os
-from solver import solvePuzzle
+from solver import solve_puzzle
 from utils import *
 
 def run_test(test_path):
@@ -7,7 +7,7 @@ def run_test(test_path):
     print(f"Loading {test_path}...")
 
     column_clues, row_clues = parse_pynogram_file(test_path)
-    our_solution = solvePuzzle(row_clues, column_clues)
+    our_solution = solve_puzzle(row_clues, column_clues)
 
     # Check if there's an empty space in our solution
     print_puzzle(our_solution)
