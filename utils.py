@@ -10,19 +10,23 @@ def print_puzzle_ascii(puzzle):
     print("│" + "│".join(puzzle[-1]) + "│")
     print("└" + "─┴" * (width - 1) + "─┘")
 
+def puzzle_row_to_emoji(row):
+    line = ''
+    for cell in row:
+        if cell == ' ':
+            line += '🟧'  # Two spaces for consistent width with emojis
+        elif cell == 'O':
+            line += '⬛'
+        elif cell == 'X':
+            line += '⬜'
+        else:
+            line += '❓'
+    return line
+
 def print_puzzle(puzzle):
     for row in puzzle:
-        line = ''
-        for cell in row:
-            if cell == ' ':
-                line += '🟧'  # Two spaces for consistent width with emojis
-            elif cell == 'O':
-                line += '⬛'
-            elif cell == 'X':
-                line += '⬜'
-            else:
-                line += '❓'
-        print(line)
+        print(puzzle_row_to_emoji(row))
+    print()
 
 def puzzle_to_2d_arr(puzzle_rows):
     return [[str(tile) for tile in row] for row in puzzle_rows]

@@ -18,6 +18,10 @@ def run_test(test_path):
 if __name__ == "__main__":
     test_dir = "data/puzzles"
     test_files = [file for file in os.listdir(test_dir) if file.endswith('.txt')]
+
+    with open("data/nonogram_ids_sorted.txt") as f:
+        puzzle_ids_sorted = [f"{line.strip()}.txt" for line in f.readlines()]
+        test_files = [file_name for file_name in puzzle_ids_sorted if file_name in test_files]
     
     successful_solves = 0
     total_puzzles = len(test_files)
