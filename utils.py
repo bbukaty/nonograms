@@ -24,7 +24,13 @@ def print_puzzle(puzzle):
                 line += '❓'
         print(line)
 
+def puzzle_to_2d_arr(puzzle_rows):
+    return [[str(tile) for tile in row] for row in puzzle_rows]
 
+def animate_solve(puzzle_rows):
+    print_puzzle(puzzle_to_2d_arr(puzzle_rows))
+    print("\033c", end='')
+    print("\033[H", end='')
 
 def parse_pynogram_file(puzzle_path):
     with open(puzzle_path) as f:
