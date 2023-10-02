@@ -87,8 +87,8 @@ def set_up_tile_refs(height, width, row_clues, col_clues):
 
 
 def init_block_domains(line):
-    """Block by block, "slides" all other blocks to the edges of the grid.
-    This gives us sort of a "worst case" baseline domain for the block to go in.
+    """Block by block, "slides" all other blocks to the edges of their domains.
+    This gives us the domain our block can slide around in.
     """
     space_before = 0
     space_after = sum(line.blocks) + len(line.blocks)
@@ -126,9 +126,8 @@ def get_active_domains(line, i):
     return active_domains
 
 def identify_o_owners(line):
-    """For Os with no recorded block owner across this axis (i.e. just placed),
-    if only one block domain covers the O, that's the O's owner; mark it down.
-    That information might allow us to constrain this and other domains down the line.
+    """If an O tile has no owner along this axis but it's
+    only included in one domain, mark that as the owner.
     """
     for tile_index, tile in enumerate(line):
         if tile != "O" or get_tile_owner(line, tile_index) != None:
@@ -136,18 +135,10 @@ def identify_o_owners(line):
 
         active_domains = get_active_domains(line, tile_index)
         assert len(active_domains) != 0 # Os should always belong to at least one domain
-        # if several domains start or end at this O, we can tiebreak with left-right priority.
         if len(active_domains) > 1:
-            active_domain_values = [line.block_domains[active_domain] for active_domain in active_domains]
-            if all(domain[0] == tile_index for domain in active_domain_values):
-                owner_block = active_domains[0]
-            elif all(domain[1] == tile_index for domain in active_domain_values):
-                owner_block = active_domains[-1]
-            else: # still ambiguous
-                continue
-        else: # only one active domain
-            owner_block = active_domains[0]
+            continue
             
+        owner_block = active_domains[0]
         if DEBUG:
             print(f"IOWN: setting {line} tile {tile_index} {line.get_owner_attr()} to block {owner_block} [{line.blocks[owner_block]}]")
         set_tile_owner(line, tile_index, owner_block)
@@ -210,10 +201,50 @@ def constrain_domains_within_xs(line):
             if b >= len(line):
                 print("ERROR: domain overflow!")
 
+def constrain_domains_based_on_unowned_blocks(line):
+    """Check for places where the block couldn't be placed
+    because if it was there it would border directly on an unowned block
+    that would make it too long.
+    can we place X's by ruling out central placements?
+    """
+    pass
+
+def constrain_domains_via_neighbors(line):
+    num_blocks = len(line.blocks)
+    if num_blocks == 1: return
+
+    # constrain the left edge of the domain based on the left neighboring block
+    for block_index in range(1, num_blocks):
+        block_domain = line.block_domains[block_index]
+        curr_a, curr_b = block_domain
+        right_block_len = line.blocks[block_index - 1]
+        right_domain_b = line.block_domains[block_index - 1][0]
+        
+        constrained_domain_start = right_domain_b + right_block_len + 1
+        if constrained_domain_start > curr_a:
+            line.has_changes = True
+            if DEBUG:
+                print(f"NEBR: shifting {line} block {block_index} [{line.blocks[block_index]}] left edge from {curr_a} to {constrained_domain_start}")
+            line.block_domains[block_index] = (constrained_domain_start, curr_b)
+
+    # constrain the right edge of the domain based on the right neighboring block
+    for block_index in reversed(range(0, num_blocks - 1)):
+        curr_a, curr_b = line.block_domains[block_index]
+        right_block_len = line.blocks[block_index + 1]
+        right_domain_b = line.block_domains[block_index + 1][1]
+        
+        constrained_domain_end = right_domain_b - (right_block_len + 1)
+        if constrained_domain_end < curr_b:
+            line.has_changes = True
+            line.block_domains[block_index] = (curr_a, constrained_domain_end)
+            if DEBUG:
+                print(f"NEBR: shifting {line} block {block_index} [{line.blocks[block_index]}] right edge from {curr_b} to {constrained_domain_end}")
+
 def solve_puzzle(row_clues, col_clues):
     width, height = len(col_clues), len(row_clues)
     rows, cols, lines = set_up_tile_refs(height, width, row_clues, col_clues)
-
+    
+    # lines is a list containing all the rows followed by all the columns.
     for line in lines:
         if line.blocks[0] == 0:
             fill_xs(line)
@@ -225,13 +256,15 @@ def solve_puzzle(row_clues, col_clues):
     progress_made = True
     while progress_made:
         progress_made = False
-        for line in lines: # lines includes rows, then columns.
+        # future optimization: accrue set of lines that has changes and only run on those lines
+        for line in lines:
             if DEBUG: print(f"Analyzing {line}...")
-            #future optimization: check if line is complete and skip it
+
             identify_o_owners(line)
-            anchor_domains_around_os(line) #if within a domain a block takes up enough that only it can be true, constrain to around
+            anchor_domains_around_os(line)
             fill_no_domains_with_xs(line)
-            constrain_domains_within_xs(line) #consider: constrain domains within xs and blocks known to be owned by neighbors
+            constrain_domains_within_xs(line)
+            constrain_domains_via_neighbors(line)
 
             fill_domain_centers(line)
             if line.has_changes:
@@ -257,10 +290,10 @@ def print_unfinished_line_domains(lines):
             print(f"{line} unfinished, domains:\n{', '.join(domains_str)}\n")
 
 if __name__ == "__main__":
-    debug_puzzle = "39883"
+    debug_puzzle = "13918"
     column_clues, row_clues = parse_pynogram_file(f"data/puzzles/{debug_puzzle}.txt")
 
-    print(f"Solving test puzzle {debug_puzzle}...")
+    print(f"Solving test puzzle {debug_puzzle}")
     our_solution = solve_puzzle(row_clues, column_clues)
 
     # print("Expected:")
