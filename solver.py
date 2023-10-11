@@ -130,7 +130,7 @@ def identify_o_owners(line):
     only included in one domain, mark that as the owner.
     """
     for tile_index, tile in enumerate(line):
-        if tile != "O" or get_tile_owner(line, tile_index) != None:
+        if not (tile == "O" and get_tile_owner(line, tile_index) == None):
             continue
 
         active_domains = get_active_domains(line, tile_index)
@@ -194,20 +194,13 @@ def constrain_domains_within_xs(line):
             b -= 1
             line.has_changes = True
         line.block_domains[block_index] = (a, b)
+
         if DEBUG and (a,b) != block_domain:
             print(f"SQSH: setting {line} block {block_index} [{block_len}] from {block_domain} to {(a,b)}")
             if a < 0:
                 print("ERROR: domain underflow!")
             if b >= len(line):
                 print("ERROR: domain overflow!")
-
-def constrain_domains_based_on_unowned_blocks(line):
-    """Check for places where the block couldn't be placed
-    because if it was there it would border directly on an unowned block
-    that would make it too long.
-    can we place X's by ruling out central placements?
-    """
-    pass
 
 def constrain_domains_via_neighbors(line):
     num_blocks = len(line.blocks)
@@ -262,11 +255,11 @@ def solve_puzzle(row_clues, col_clues):
 
             identify_o_owners(line)
             anchor_domains_around_os(line)
-            fill_no_domains_with_xs(line)
             constrain_domains_within_xs(line)
             constrain_domains_via_neighbors(line)
-
+            fill_no_domains_with_xs(line)
             fill_domain_centers(line)
+
             if line.has_changes:
                 if DEBUG: print_puzzle(puzzle_to_2d_arr(rows))
                 progress_made = True
@@ -274,10 +267,10 @@ def solve_puzzle(row_clues, col_clues):
 
     if DEBUG:
         print_unfinished_line_domains(lines)
-        print_block_owners(rows)
+        print_unowned_blocks(rows)
     return puzzle_to_2d_arr(rows)
 
-def print_block_owners(rows):
+def print_unowned_blocks(rows):
     for line in rows:
         for tile_index, tile in enumerate(line):
             if tile == "O" and (tile.row_owner == None or tile.col_owner == None):
@@ -290,14 +283,14 @@ def print_unfinished_line_domains(lines):
             print(f"{line} unfinished, domains:\n{', '.join(domains_str)}\n")
 
 if __name__ == "__main__":
-    debug_puzzle = "13918"
+    debug_puzzle = None
+    if not debug_puzzle:
+        exit()
+    
+    print(f"Solving test puzzle {debug_puzzle}...")
     column_clues, row_clues = parse_pynogram_file(f"data/puzzles/{debug_puzzle}.txt")
-
-    print(f"Solving test puzzle {debug_puzzle}")
     our_solution = solve_puzzle(row_clues, column_clues)
 
-    # print("Expected:")
-    # print_puzzle(puzzle["solution"])
     print("Got:")
     print_puzzle(our_solution)
 
