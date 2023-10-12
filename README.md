@@ -14,20 +14,19 @@ Additionally, [notes/solutions.gif](notes/solutions.gif) (_warning: flashing ima
 
 
 # Approach
-In the parlance of the papers I found, I was focusing on "line solving". I analyze rows and columns one at a time with respect to their current state and clues, filling in tiles only with certainty (as opposed to applying search algorithms/guess and check).
-
+In the parlance of the papers I'll describe in a moment, I was focusing on "line solving". I analyze rows and columns one at a time with respect to their current state and clues, filling in tiles only with certainty (as opposed to applying search algorithms/guess and check).
 
 To make more progress with this approach, it looked like I was going to need to start adding much more complicated inference rules to solve the long tail of edge cases supported by the puzzle rules. This was a bit surprising to me!
 
 In fact, it turns out that nonograms are actually a pretty tricky NP-complete problem with several [research](https://ir.nctu.edu.tw/bitstream/11536/22772/1/000324586300005.pdf) [papers](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.177.76&rep=rep1&type=pdf) dedicated to solver algorithms!
 
-Anyway, might revisit and improve this later, but I had fun working on it.
-
-
-# Examples
+So, I think I've mostly had my fun with this project. It was cool to make some testing infrastructure that gave me an accuracy percentage I could improve. If I were to revisit this in the future, it could be interesting to try and implement an algorithm straight from a paper, something I don't have much experience with.
 
 For fun, here's a snapshot of what my workflow looked like while developing and testing the solver:
 ![Alt text](notes/workflow.png)
+
+# Examples
+
 
 ### Successful Solves
 ![Alt text](notes/heart-unsolved.png)  
