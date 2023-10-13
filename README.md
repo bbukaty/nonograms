@@ -10,7 +10,7 @@ I ended up with a pretty competent solver that only got stuck on inferences that
 
 At the bottom of this readme, you can see some examples of puzzles it successfully solved and didn't solve.  
 
-Additionally, [notes/solutions.gif](notes/solutions.gif) (_warning: flashing examplery_) shows the command line output of the solver running on all my test puzzles. It was fun to see my solver algorithm cruise through hundreds of puzzles that would each take me a good 20 minutes and a calculator to figure out.
+Additionally, [demos/solutions.gif](demos/solutions.gif) (_warning: flashing examplery_) shows the command line output of the solver running on all my test puzzles. It was fun to see my solver algorithm cruise through hundreds of puzzles that would each take me a good 20 minutes and a calculator to figure out.
 
 
 # Approach
@@ -23,52 +23,32 @@ In fact, it turns out that nonograms are actually a pretty tricky NP-complete pr
 So, I think I've mostly had my fun with this project. It was cool to make some testing infrastructure that gave me an accuracy percentage I could improve. If I were to revisit this in the future, it could be interesting to try and implement an algorithm straight from a paper, something I don't have much experience with.
 
 For fun, here's a snapshot of what my workflow looked like while developing and testing the solver:
-![](notes/workflow.png)
+![](demos/workflow.png)
 
-# Examples
+# Gallery
 
 
 ### Successful Solves
-![](notes/heart-unsolved.png)  
-![](notes/heart-solved.png) 
+![](demos/heart-unsolved.png)  
+![](demos/heart-solved.png) 
 
-The rest of my examples are going to use the solution format that my script actually printed, which was emoji grids. You'll notice that hints are omitted; I didn't end up making a good way of printing out hint grids in the command line.
+I was a bit too lazy to figure out a good way to render the hint columns above and aside the puzzles, so those will be missing from here on out. (The above were just screenshots from a puzzle I recreated in an online puzzle maker.)
 
+Nevertheless, ChatGPT was great for giving me a fairly ready-to-use GIF maker for my solutions, so we can enjoy these:
 
-⬜⬛⬜⬛⬜  
-⬛⬛⬛⬛⬛  
-⬛⬛⬛⬛⬛  
-⬜⬛⬛⬛⬜  
-⬜⬜⬛⬜⬜  
-
-⬛⬛⬛⬜⬜⬜⬜⬜⬜  
-⬛⬜⬛⬛⬛⬛⬛⬛⬛  
-⬛⬛⬛⬜⬜⬜⬛⬜⬛  
-
-⬜⬜⬜⬜⬛⬛⬜⬜  
-⬜⬜⬜⬜⬛⬛⬛⬜  
-⬜⬜⬜⬜⬛⬜⬜⬛  
-⬜⬜⬜⬜⬛⬜⬜⬜  
-⬜⬜⬜⬜⬛⬜⬜⬜  
-⬜⬛⬛⬛⬛⬜⬜⬜  
-⬛⬛⬛⬛⬛⬜⬜⬜  
-⬛⬛⬛⬛⬛⬜⬜⬜  
-⬜⬛⬛⬛⬜⬜⬜⬜  
-
-![](notes/floppy.png)
-
-![](notes/dolphin.png) 
-
-![](notes/palace.png)  
+![](demos/heart_solve.gif)
+![](demos/dolphin_solve.gif)
+![](demos/keyboard_solve.gif)
+![](demos/dolphin.png) 
+![](demos/castle_solve.gif) 
 
 
-### Unsucessful Solves
+### Unsuccessful Solves
 
 Orange squares represent the remaining unsolved portions of a puzzle.
 
-
-
-![](notes/bird-unsolved.png)
+![](demos/bird-unsolved.png)  
+![](demos/failed_small.gif)
 
 🟧🟧⬜⬜🟧⬜⬜🟧🟧🟧🟧  
 🟧🟧⬜⬜🟧🟧🟧⬛🟧🟧🟧  
@@ -80,12 +60,11 @@ Orange squares represent the remaining unsolved portions of a puzzle.
 
 Correct solution to above puzzle:
 
-![](notes/bird-solved.png)
+![](demos/bird-solved.png)
 
+![](demos/broken.png.png)
 
-![](notes/broken.png.png)
-
-![](notes/ufo.png) 
+![](demos/ufo_solve_failed.gif)
 
 [^1]: I'm not going to name the database or provide my scraper code to avoid any attribution issues.
 

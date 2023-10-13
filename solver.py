@@ -1,6 +1,7 @@
 from collections.abc import Sequence
 from utils import *
 DEBUG = False
+ANIMATE = False
 
 class Tile:
     """One tile in the puzzle. status may be space, X, or O."""
@@ -244,7 +245,7 @@ def solve_puzzle(row_clues, col_clues):
             continue
         init_block_domains(line)
         fill_domain_centers(line)
-    if DEBUG: print_puzzle(puzzle_to_2d_arr(rows))
+    if DEBUG or ANIMATE: print_puzzle(puzzle_to_2d_arr(rows))
 
     progress_made = True
     while progress_made:
@@ -252,6 +253,7 @@ def solve_puzzle(row_clues, col_clues):
         # future optimization: accrue set of lines that has changes and only run on those lines
         for line in lines:
             if DEBUG: print(f"Analyzing {line}...")
+            snapshot = ''.join([tile.status for tile in line])
 
             identify_o_owners(line)
             anchor_domains_around_os(line)
@@ -261,9 +263,12 @@ def solve_puzzle(row_clues, col_clues):
             fill_domain_centers(line)
 
             if line.has_changes:
-                if DEBUG: print_puzzle(puzzle_to_2d_arr(rows))
                 progress_made = True
                 line.has_changes = False # reset for next iteration
+
+            new_snapshot = ''.join([tile.status for tile in line])
+            if new_snapshot != snapshot and (DEBUG or ANIMATE):
+                print_puzzle(puzzle_to_2d_arr(rows))
 
     if DEBUG:
         print_unfinished_line_domains(lines)
@@ -283,7 +288,13 @@ def print_unfinished_line_domains(lines):
             print(f"{line} unfinished, domains:\n{', '.join(domains_str)}\n")
 
 if __name__ == "__main__":
-    debug_puzzle = None
+    # debug_puzzle = "41342" #keyboard
+    # debug_puzzle = "22226" #apple
+    # debug_puzzle = "10363" #dolphin
+    # debug_puzzle = "57596" #simplest dog
+    # debug_puzzle = "25897" # ufo
+    # debug_puzzle = "40918" # small failed
+    debug_puzzle = "29705"
     if not debug_puzzle:
         exit()
     
